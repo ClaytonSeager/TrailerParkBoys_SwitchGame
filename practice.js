@@ -57,7 +57,7 @@ function move(direction) {
             mentalState = mentalState - 20;
             break;
         case "left":
-            whatHappens = "You walked over to Bubbles Shed, and are now tasked with finding more shopping carts. He gives you $10 though!";
+            whatHappens = "You walked over to Bubbles Shed, and he wants you to throw shopping carts down the hill outside the mall. He gives you $10!";
             money = money + 10;
             break;
         case "right":
