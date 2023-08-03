@@ -1,0 +1,104 @@
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f3f3f3;
+    margin: 0;
+    padding-top: 20px;
+}
+img {
+    margin: 10px;
+}
+p {
+    text-align: center;
+    font-style: italic;
+}
+.title {
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    color: #333;
+    text-align: center;
+    height: 50px;
+}
+.game-section {
+    border: 5px inset #3C3B3C;
+    width: 95vw;
+    padding: 75px 0;
+}
+.stats-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+.stats-column {
+    flex-direction: column;
+    text-align: right;
+    border: 1px inset #3C3B3C;
+    padding: 0 20px;
+    margin-bottom: 100px;
+}
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.button-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    background-color: #f0f0f0;
+    border: 2px solid #333;
+    border-radius: 5px;
+    margin: 5px;
+    cursor: pointer;
+    position: relative;
+    transition: color 200ms ease, background 200ms ease;
+}
+
+.button.up:after {
+    content: "↑";
+    position: absolute;
+}
+
+
+.button.left:after {
+    content: "←";
+    position: absolute;
+}
+
+.button.down:after {
+    content: "↓";
+    position: absolute;
+}
+
+.button.right:after {
+    content: "→";
+    position: absolute;
+}
+.button:hover {
+    background: #3C3B3C;
+    color: #FFFFFF;
+}
+.healthSpot {
+    color: #D50842;
+}
+.mentalStateSpot {
+    color: #febf04;
+}
+.moneySpot {
+    color: #56B870;
+}
+.whatHappensSpot {
+    text-align: center;
+}
