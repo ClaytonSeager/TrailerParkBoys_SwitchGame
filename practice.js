@@ -14,6 +14,19 @@ let upButton = document.querySelector(".up");
 let rightButton = document.querySelector(".right");
 let downButton = document.querySelector(".down");
 let leftButton = document.querySelector(".left");
+// New Code To Add Keyboard Arrow Input
+document.addEventListener('keydown', function(event) {
+    if (event.keyCode == 38) {
+        OGMove[0]();
+    } else if (event.keyCode == 40) {
+        OGMove[3]();
+    } else if (event.keyCode == 37) {
+        OGMove[2]();
+    } else if (event.keyCode == 39) {
+        OGMove[1]();
+    }
+});
+// The above code should allow for usage of keyboard arrow keys to work exactly the same as the buttons on page.
 let img = document.querySelector("#gameImage")
 let OGMove = [moveUp, moveRight, moveLeft, moveDown]
 let images = ["angryRandy.png", "randyLicking.png"]
