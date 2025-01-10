@@ -1,114 +1,292 @@
-body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    background-color: #f3f3f3;
-    margin: 0;
-    padding-top: 20px;
+:root {
+    --primary-color: #3C3B3C;
+    --health-color: #D50842;
+    --mental-color: #febf04;
+    --money-color: #56B870;
+    --button-hover: #3C3B3C;
+    --background-color: #f3f3f3;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-img {
-    margin: 10px;
-}
-.center {
-    text-align: center;
-}
-p {
-    text-align: center;
-    font-style: italic;
-}
-.title {
-    font-family: Arial, sans-serif;
-    font-size: 24px;
-    color: #333;
-    text-align: center;
-    height: 50px;
-}
-.game-section {
-    border: 5px inset #3C3B3C;
-    width: 95vw;
-    padding: 75px 0;
-}
-.stats-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
 
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
-.stats-column {
-    flex-direction: column;
-    text-align: right;
-    border: 1px inset #3C3B3C;
-    padding: 0 20px;
-    margin-bottom: 10px;
+
+body {
+    min-height: 100vh;
+    background-color: var(--background-color);
+    font-family: Arial, sans-serif;
 }
-.button-container {
+
+header {
+    width: 100%;
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.banner-image {
+    width: 70%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.title {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    font-size: 2rem;
+    padding: 0 1rem;
+    z-index: 2;
+}
+
+.game-section {
+    max-width: 800px;
+    margin: 1rem auto;
+    padding: 1rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: var(--box-shadow);
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    max-width: 400px;
+    margin: 0 auto 1rem;
+    padding: 0.75rem;
+    background: #f8f8f8;
+    border-radius: 10px;
+    box-shadow: var(--box-shadow);
+}
+
+.stats-labels h3, 
+.stats-values h3 {
+    margin: 0.25rem 0;
+    font-size: 1rem;
+}
+
+.stats-values h3 {
+    font-weight: bold;
+}
+
+.game-display {
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 1rem;
+}
+
+.whatHappensSpot {
+    text-align: center;
+    font-size: 1rem;
+    max-width: 800px;
+    padding: 0.75rem;
+    background: #f8f8f8;
+    border-radius: 10px;
+    box-shadow: var(--box-shadow);
+    margin-bottom: 0.5rem;
+}
+
+.game-interface {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.controls-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 2rem;
+    width: 100%;
+    max-width: 800px;
+}
+
+.direction-text {
+    flex: 1;
+    max-width: 400px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    background: #f8f8f8;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: var(--box-shadow);
+}
+
+.controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #f8f8f8;
+    border-radius: 10px;
+    box-shadow: var(--box-shadow);
+}
+
+#gameImage {
+    max-width: 500px;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: var(--box-shadow);
+}
+
+.direction-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: 5px;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.direction-option:hover {
+    transform: translateX(5px);
+    background: #f0f0f0;
+}
+
+.arrow {
+    font-weight: bold;
+    color: var(--primary-color);
+    min-width: 24px;
+    font-size: 1.2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.option-text {
+    text-align: left;
+    font-size: 1rem;
+    flex: 1;
 }
 
 .button-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
 }
 
 .button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     width: 50px;
     height: 50px;
-    background-color: #f0f0f0;
-    border: 2px solid #333;
-    border-radius: 5px;
-    margin: 5px;
+    border: none;
+    border-radius: 12px;
+    background: white;
+    box-shadow: var(--box-shadow);
     cursor: pointer;
+    transition: all 0.2s ease;
     position: relative;
-    transition: color 200ms ease, background 200ms ease;
 }
 
-.button.up:after {
-    content: "↑";
+.button::after {
+    content: '';
     position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    border: 12px solid transparent;
 }
 
-
-.button.left:after {
-    content: "←";
-    position: absolute;
+.button.up::after {
+    border-bottom-color: var(--primary-color);
+    margin-top: -6px;
 }
 
-.button.down:after {
-    content: "↓";
-    position: absolute;
+.button.down::after {
+    border-top-color: var(--primary-color);
+    margin-top: 6px;
 }
 
-.button.right:after {
-    content: "→";
-    position: absolute;
+.button.left::after {
+    border-right-color: var(--primary-color);
+    margin-left: -6px;
 }
+
+.button.right::after {
+    border-left-color: var(--primary-color);
+    margin-left: 6px;
+}
+
 .button:hover {
-    background: #3C3B3C;
-    color: #FFFFFF;
+    transform: translateY(-2px);
+    background: var(--button-hover);
 }
-.button-column {
-    flex-direction: column;
-    text-align: left;
-    border: 1px inset #3C3B3C;
-    padding: 0 20px;
-    margin-bottom: 20px;
+
+.button:hover::after {
+    border-bottom-color: white;
+    border-top-color: white;
+    border-left-color: white;
+    border-right-color: white;
 }
-.healthSpot {
-    color: #D50842;
-}
-.mentalStateSpot {
-    color: #febf04;
-}
-.moneySpot {
-    color: #56B870;
-}
-.whatHappensSpot {
+
+.instructions {
     text-align: center;
+    margin-top: 1rem;
+    font-style: italic;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.healthSpot { color: var(--health-color); }
+.mentalStateSpot { color: var(--mental-color); }
+.moneySpot { color: var(--money-color); }
+.cheeseburgerSpot { color: var(--primary-color); }
+
+/* Position the up button in its own row */
+.button.up {
+    grid-column: 2;
+}
+
+/* Position down button in the middle of bottom row */
+.button.down {
+    grid-column: 2;
+}
+
+/* Position left button */
+.button.left {
+    grid-column: 1;
+}
+
+/* Position right button */
+.button.right {
+    grid-column: 3;
+}
+
+@media (max-width: 600px) {
+    header {
+        height: 150px;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .game-section {
+        padding: 0.5rem;
+        margin: 0.5rem;
+    }
+
+    .button {
+        width: 45px;
+        height: 45px;
+    }
 }
