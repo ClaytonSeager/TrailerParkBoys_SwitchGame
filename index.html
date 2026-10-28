@@ -1,110 +1,43 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes, maximum-scale=5">
-    <title>Sunnyvale Adventure Game</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
-  </head>
-  <body>
-    <header>
-        <img src="TPB.jpg" alt="Trailer Park Boys banner" class="banner-image">
-        <h1 class="title">Welcome to Sunnyvale Trailer Park!</h1>
-    </header>
-
-    <main class="game-section">
-        <section class="stats-container">
-            <div class="stats-labels">
-                <h3>Health:</h3>
-                <h3>Mental State:</h3>
-                <h3>Cash Balance:</h3>
-                <h3>Cheeseburgers:</h3>
-            </div>
-            <div class="stats-values">
-                <h3 class="healthSpot"></h3>
-                <h3 class="mentalStateSpot"></h3>
-                <h3 class="moneySpot"></h3>
-                <h3 class="cheeseburgerSpot"></h3>
-            </div>
-        </section>
-
-        <section class="game-display">
-            <p class="whatHappensSpot">
-                You walk up to the entrance and Randy wants to know if you are here to see Ricky
-                <br>
-                <small><em>(Popsicle juices are all over his chest...)</em></small>
-            </p>
-            
-            <div class="game-interface">
-                <img src="randyLicking.png" alt="" id="gameImage">
-                
-                <div class="controls-container">
-                    <div class="direction-text">
-                        <div class="direction-option">
-                            <span class="arrow arrow-up">↑</span>
-                            <span class="option-text">Tell Randy to Fuck Off!</span>
-                        </div>
-                        <div class="direction-option">
-                            <span class="arrow arrow-left">←</span>
-                            <span class="option-text">Get a Popsicle</span>
-                        </div>
-                        <div class="direction-option">
-                            <span class="arrow arrow-right">→</span>
-                            <span class="option-text">Call Jacob and Cory</span>
-                        </div>
-                        <div class="direction-option">
-                            <span class="arrow arrow-down">↓</span>
-                            <span class="option-text">Leave the park</span>
-                        </div>
-                    </div>
-
-                    <div class="controls">
-                        <button class="button up" aria-label="Move Up"></button>
-                        <div class="button-row">
-                            <button class="button left" aria-label="Move Left"></button>
-                            <button class="button down" aria-label="Move Down"></button>
-                            <button class="button right" aria-label="Move Right"></button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <footer>
-            <p class="instructions">Use arrow keys or buttons to navigate Sunnyvale</p>
-        </footer>
-    </main>
-    <script src="story/locations.js"></script>
-    <script src="story/characters.js"></script>
-    <script src="story/items.js"></script>
-    <script src="story/quests.js"></script>
-    <script src="gameEngine.js"></script>
-    <script>
-        const game = new GameEngine();
-        
-        document.addEventListener('keydown', function(event) {
-            switch(event.key) {
-                case "ArrowUp":
-                    game.move('up');
-                    break;
-                case "ArrowRight":
-                    game.move('right');
-                    break;
-                case "ArrowDown":
-                    game.move('down');
-                    break;
-                case "ArrowLeft":
-                    game.move('left');
-                    break;
-            }
-        });
-
-        document.querySelector('.button.up').addEventListener('click', () => game.move('up'));
-        document.querySelector('.button.right').addEventListener('click', () => game.move('right'));
-        document.querySelector('.button.down').addEventListener('click', () => game.move('down'));
-        document.querySelector('.button.left').addEventListener('click', () => game.move('left'));
-
-        game.updateDisplay();
-    </script>
-  </body>
+<head>
+ <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+ <meta name="theme-color" content="#233b30"><meta name="description" content="A scrappy open-world Sunnyvale adventure. Meet the boys, take on schemes, and fill your definitely-not-stolen bag.">
+ <title>Sunnyvale — One Last Scheme</title><link rel="icon" href="assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+ <header class="topbar">
+  <a class="brand" href="./" aria-label="Sunnyvale home"><span class="brand-mark">☀</span><span>SUNNYVALE<small>ONE LAST SCHEME</small></span></a>
+  <div class="world-status"><span class="live-dot"></span> A perfectly normal day in the park <span class="status-divider">/</span><span id="clock">MON · 8:00 AM</span></div>
+  <button id="help-button" class="header-help" aria-label="How to play"><span>?</span><b>How to play</b></button>
+ </header>
+ <main class="game-shell">
+  <nav class="rail" aria-label="Game menus">
+   <button class="rail-button active" id="explore-button" title="Explore" aria-label="Explore the park"><span data-icon="compass"></span><small>EXPLORE</small></button>
+   <button class="rail-button" id="journal-button" title="Schemes (J)" aria-label="Open schemes"><span data-icon="journal"></span><small>SCHEMES</small><i id="quest-dot"></i></button>
+   <button class="rail-button" id="bag-button" title="Your bag (I or B)" aria-label="Open your definitely not stolen bag"><span data-icon="bag"></span><small>THE BAG</small></button>
+   <button class="rail-button" id="map-button" title="Park map (M)" aria-label="Open park map"><span data-icon="map"></span><small>MAP</small></button>
+   <div class="rail-bottom"><span class="rail-tree">♠</span><small>EST. 1999</small></div>
+  </nav>
+  <section class="world-frame" aria-label="Sunnyvale open world">
+   <canvas id="world" tabindex="0" aria-label="Sunnyvale game world. Move with WASD or arrow keys. Press E to interact. Open your bag with I.">Your browser needs canvas support to explore Sunnyvale.</canvas>
+   <div class="scene-vignette"></div>
+   <div class="location-tag"><span class="live-dot"></span><span id="area-name">SUNNYVALE TRAILER PARK</span><span class="area-weather">☀ 22°</span></div>
+   <div class="stats-hud">
+    <div class="hud-stat"><span class="stat-symbol heart">♥</span><span><small>HEALTH</small><b id="health-value">100</b><span class="stat-meter"><i id="health-meter"></i></span></span></div>
+    <div class="hud-stat"><span class="stat-symbol brain">✦</span><span><small>MENTAL STATE</small><b id="mental-value">100</b><span class="stat-meter mental"><i id="mental-meter"></i></span></span></div>
+    <div class="hud-cash"><small>POCKET MONEY</small><b id="cash-value">$80</b></div>
+   </div>
+   <aside class="mission-card" id="mission-card"><div class="eyebrow"><span class="mission-star">✧</span> THE BIG PICTURE <span id="mission-counter">0 / 6</span></div><h2>Keep the park alive.</h2><p id="mission-objective">Make $1,500 and finish 6 schemes. Start by finding the boys.</p><div class="goal-track"><i id="goal-meter"></i></div><button id="mission-open">View your schemes <span>↗</span></button></aside>
+   <div id="interaction-prompt" class="interaction-prompt" hidden><kbd>E</kbd><span>Talk to Bubbles</span><button id="interact-click" aria-label="Interact">↗</button></div>
+   <div class="bottom-left"><div class="park-label"><span>YOU'RE IN</span><strong>Sunnyvale, bud.</strong><small>Small park. Questionable decisions.</small></div><div id="toast" class="toast" role="status" aria-live="polite" hidden></div></div>
+   <button id="minimap-button" class="minimap" aria-label="Open full park map"><canvas id="minimap" width="200" height="142"></canvas><span>SUNNYVALE <kbd>M</kbd></span></button>
+   <div class="touch-controls" aria-label="Touch movement controls"><div class="touch-dpad"><button data-move="up" aria-label="Walk up">↑</button><button data-move="left" aria-label="Walk left">←</button><button data-move="down" aria-label="Walk down">↓</button><button data-move="right" aria-label="Walk right">→</button></div><button id="touch-interact" aria-label="Interact">E<small>INTERACT</small></button></div>
+   <div class="loading" id="loading"><span class="brand-mark">☀</span><p>Finding the keys to the park…</p></div>
+  </section>
+ </main>
+ <footer class="statusbar"><div><span class="live-dot"></span><span id="save-state">YOUR PROGRESS SAVES AUTOMATICALLY</span></div><div class="desktop-shortcuts"><span><kbd>W A S D</kbd> Move</span><span><kbd>SHIFT</kbd> Hustle</span><span><kbd>E</kbd> Interact</span><span><kbd>I</kbd> The bag</span></div><span class="fan-note">AN UNOFFICIAL FAN ADVENTURE</span></footer>
+ <div id="modal-layer" class="modal-layer" hidden><section id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1"><button id="modal-close" class="modal-close" aria-label="Close menu">×</button><div id="modal-content"></div></section></div>
+ <script type="module" src="app.js"></script>
+</body>
 </html>

@@ -1,0 +1,29 @@
+name: Check Sunnyvale
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  game:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test game mechanics and content
+        run: npm test
+      - name: Check published runtime files
+        run: |
+          for file in index.html style.css app.js gameEngine.js renderer.js story/locations.js story/characters.js story/items.js story/quests.js assets/favicon.svg .nojekyll; do
+            test -f "$file" || exit 1
+          done
+          node --check app.js
+          node --check renderer.js
