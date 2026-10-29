@@ -241,7 +241,7 @@ test('Lahey uses the nearby inner lane instead of parking beyond the first row o
 
 test('Cyrus routes around a real trailer and only starts his dialogue after actually reaching the player', () => {
     const engine = new GameEngine({ storage: null, random: () => .1 });
-    const trailer = locations.find(l => l.id === 'ricky');
+    const trailer = locations.find(l => l.id === 'julian');
     engine.state.player = { x: trailer.x + trailer.w / 2, y: trailer.y - 35, facing: 'down' };
     startEncounter(engine, 'cyrus', { force: true });
     const enemy = engine.encounter.actors[0];

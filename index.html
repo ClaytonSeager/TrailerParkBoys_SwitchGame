@@ -8,8 +8,8 @@
 <body>
  <header class="topbar">
   <a class="brand" href="./" aria-label="Sunnyvale home"><span class="brand-mark">☀</span><span>SUNNYVALE<small>ONE LAST SCHEME</small></span></a>
-  <div class="world-status"><span class="live-dot"></span> A perfectly normal day in the park <span class="status-divider">/</span><span id="clock">MON · 8:00 AM</span></div>
-  <button id="help-button" class="header-help" aria-label="How to play"><span>?</span><b>How to play</b></button>
+  <div class="world-status"><span class="live-dot"></span><span id="world-ambience-label">A perfectly normal day in the park</span><span class="status-divider">/</span><span id="clock">MON · 8:00 AM</span></div>
+  <div class="header-actions"><button id="sound-button" class="sound-button" aria-label="Sound settings"><span id="sound-icon" aria-hidden="true">♫</span><b id="sound-label">SOUND ON</b></button><button id="help-button" class="header-help" aria-label="How to play"><span>?</span><b>How to play</b></button></div>
  </header>
  <main class="game-shell">
   <nav class="rail" aria-label="Game menus">
@@ -29,15 +29,15 @@
     <div class="hud-stat"><span class="stat-symbol brain">✦</span><span><small>MENTAL STATE</small><b id="mental-value">100</b><span class="stat-meter mental"><i id="mental-meter"></i></span></span></div>
     <div class="hud-cash"><small>POCKET MONEY</small><b id="cash-value">$80</b></div>
    </div>
-   <aside class="mission-card" id="mission-card"><div class="eyebrow"><span class="mission-star">✧</span> THE BIG PICTURE <span id="mission-counter">0 / 6</span></div><h2>Keep the park alive.</h2><p id="mission-objective">Make $1,500 and finish 6 schemes. Start by finding the boys.</p><div class="goal-track"><i id="goal-meter"></i></div><button id="mission-open">View your schemes <span>↗</span></button></aside>
+   <aside class="mission-card" id="mission-card"><div class="eyebrow"><span class="mission-star">✧</span> THE BIG PICTURE <span id="mission-counter">0 / 6</span></div><h2>Keep the park alive.</h2><p id="mission-objective">Make $1,500 and finish 6 schemes. Start by finding the boys.</p><div id="tracking-hint" class="tracking-hint" hidden><span id="tracking-arrow">↗</span><span id="tracking-text"></span></div><div class="goal-track"><i id="goal-meter"></i></div><button id="mission-open">View your schemes <span>↗</span></button></aside>
    <div id="encounter-banner" class="encounter-banner" role="status" aria-live="polite" hidden><span class="encounter-dot"></span><div><strong id="encounter-name"></strong><small id="encounter-hint"></small></div></div>
    <section id="encounter-choice" class="encounter-choice" aria-label="Encounter choices" hidden></section>
    <div id="combat-hud" class="combat-hud" hidden><div class="combat-head"><span id="combat-enemy">RANDY</span><b id="combat-enemy-health"></b></div><div class="enemy-track"><i id="combat-enemy-meter"></i></div><div class="combat-actions"><button data-combat="punch"><kbd>F</kbd> Punch</button><button data-combat="block"><kbd>Q</kbd> Block</button><button data-combat="dodge"><kbd>SPACE</kbd> Dodge</button></div><small>Watch the wind-up. Dodge the hit. Keep your feet moving.</small></div>
    <div id="interaction-prompt" class="interaction-prompt" hidden><kbd>E</kbd><span>Talk to Bubbles</span><button id="interact-click" aria-label="Interact">↗</button></div>
    <div class="bottom-left"><div class="player-card"><span class="level-medallion" id="level-value">1</span><div><strong id="player-rank">PARK NEWCOMER</strong><span class="xp-track"><i id="xp-meter"></i></span><small id="xp-value">0 / 100 XP</small></div><span class="energy-chip" id="energy-value">⚡ 100</span></div><div id="toast" class="toast" role="status" aria-live="polite" hidden></div></div>
-   <div id="driving-hud" class="driving-hud" hidden><span>THE SHITMOBILE</span><strong id="speed-value">0</strong><small>W/S GAS & REVERSE · A/D STEER · E GET OUT</small></div>
+   <div id="driving-hud" class="driving-hud" hidden><span>THE SHITMOBILE · HOME SWEET CAR</span><strong id="speed-value">0</strong><small>W/S GAS & REVERSE · A/D STEER · E GET OUT</small><div class="car-actions"><button id="horn-button"><kbd>H</kbd> Honk</button><button id="car-rest-button">☾ Crash in the car</button></div></div>
    <div class="zoom-controls" aria-label="Camera zoom"><button id="zoom-out" aria-label="Zoom out">−</button><span id="zoom-value">165%</span><button id="zoom-in" aria-label="Zoom in">+</button></div>
-   <button id="minimap-button" class="minimap" aria-label="Open full park map"><canvas id="minimap" width="200" height="142"></canvas><span>SUNNYVALE <kbd>M</kbd></span></button>
+   <button id="minimap-button" class="minimap" aria-label="Open full park map"><canvas id="minimap" width="200" height="142"></canvas><span><b id="minimap-region">SUNNYVALE</b><kbd>M</kbd></span></button>
    <div class="touch-controls" aria-label="Touch movement controls"><div class="touch-dpad"><button data-move="up" aria-label="Walk up">↑</button><button data-move="left" aria-label="Walk left">←</button><button data-move="down" aria-label="Walk down">↓</button><button data-move="right" aria-label="Walk right">→</button></div><button id="touch-interact" aria-label="Interact">E<small>INTERACT</small></button></div>
    <div class="loading" id="loading"><span class="brand-mark">☀</span><p>Finding the keys to the park…</p></div>
   </section>

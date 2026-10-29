@@ -22,7 +22,7 @@ test('movement is normalized, respects buildings and world bounds, and cannot tu
     diagonal.move(1, 1, 0.1);
     assert.ok(Math.abs(Math.hypot(straight.state.player.x - start.x, straight.state.player.y - start.y) -
         Math.hypot(diagonal.state.player.x - start.x, diagonal.state.player.y - start.y)) < 0.001);
-    const building = locations[0];
+    const building = locations.find(location => location.solid !== false);
     at(straight, { x: building.x - 20, y: building.y + building.h / 2 });
     straight.move(1, 0, 1, true);
     assert.ok(straight.state.player.x <= building.x - 13);
@@ -130,6 +130,7 @@ test('world data has no overlapping buildings and all interaction points are rea
     for (const pickup of pickups) assert.ok(reachable(pickup), `Unreachable pickup ${pickup.id}`);
     for (let a = 0; a < locations.length; a += 1) for (let b = a + 1; b < locations.length; b += 1) {
         const first = locations[a], second = locations[b];
+        if (first.solid === false || second.solid === false) continue;
         assert.ok(!(first.x < second.x + second.w && first.x + first.w > second.x && first.y < second.y + second.h && first.y + first.h > second.y), `Overlapping buildings ${first.id}, ${second.id}`);
     }
 });

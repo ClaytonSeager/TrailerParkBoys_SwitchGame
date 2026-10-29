@@ -1,4 +1,10 @@
 export const items = {
+  mallReceipt: {name:'Cart deposit receipt',description:'A slightly crumpled mall cart deposit slip. Bubbles will know exactly what it is worth.',icon:'▤',color:'#e1d3ab'},
+  fuelCan: {name:'Fuel can',description:'A sealed can from Gas & Go. Ricky calls it a mobility investment.',icon:'▣',color:'#ba7050'},
+  quarryStone: {name:'Quarry stone sample',description:'A surprisingly useful piece of Rocky Ridge gravel. Sarah asked for a proper sample.',icon:'◆',color:'#b2b19a'},
+  fishingTackle: {name:'Fishing tackle',description:'A tidy little tackle tin from Old Mill Lake. Keep the hooks away from your bag lining.',icon:'⚒',color:'#759d8b'},
+  vinylRecord: {name:'Vintage vinyl',description:'A dusty local pressing from Second Time Around. J-Roc calls that texture.',icon:'●',color:'#8e779f'},
+  deliveryParcel: {name:'City delivery parcel',description:'A sealed Bluebird courier box addressed to Sunnyvale. It smells faintly of coffee.',icon:'▥',color:'#c39e68'},
   cart: { name: 'Shopping cart', description: 'A cart ready for a second career at Bubbles\' repair service.', icon: '▥', color: '#b8c7c6' },
   scrap: { name: 'Salvage scrap', description: 'Useful metal for the kitty shelter and stage supports.', icon: '◆', color: '#929d91' },
   tool: { name: 'Lost tool', description: 'A wrench from Ricky\'s extremely informal lending library.', icon: '⚒', color: '#d1ae6d' },
@@ -12,6 +18,12 @@ export const items = {
 
 // Hand placed in open space: enough supplies for every mission, plus extras.
 const groups = {
+  mallReceipt:[[7730,4865],[8040,4870],[8210,4865]],
+  fuelCan:[[3030,3120],[3270,3130],[3390,3085]],
+  quarryStone:[[5180,2270],[5360,2300],[5640,2260]],
+  fishingTackle:[[4320,5210],[4520,5215],[4630,5180]],
+  vinylRecord:[[8520,5710],[8740,5690],[8860,5695]],
+  deliveryParcel:[[8010,5690],[8200,5705],[8330,5685]],
   cart: [[920,800],[1060,795],[810,795],[1210,805],[1660,790],[2150,795],[2910,805],[670,1350],[2440,1355]],
   scrap: [[315,1780],[410,1800],[545,1775],[610,1840],[650,1745],[690,1880],[2390,1800],[2490,1780],[2750,1790],[2810,1850],[3020,1785]],
   tool: [[610,785],[850,780],[1250,800],[2460,1320],[2520,1380],[2750,1320],[590,1780]],

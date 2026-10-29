@@ -1,6 +1,72 @@
 // Deliveries consume their item/count. Collect targets are item ids; visit targets are location ids.
 export const quests = [
   {
+    id: 'retail_therapy', title: 'Retail therapy, cart edition', giver: 'bubbles', requires: [],
+    description: 'Bubbles has a legitimate cart deposit to collect at the distant shopping mall. Apparently paperwork is part of the cart business now.',
+    steps: [
+      { type: 'visit', target: 'mall', text: 'Drive out to the city shopping mall.' },
+      { type: 'collect', target: 'mallReceipt', count: 1, text: 'Find a cart-deposit receipt by the mall corral.' },
+      { type: 'deliver', target: 'bubbles', item: 'mallReceipt', count: 1, text: 'Find Bubbles and bring him the deposit receipt.' },
+    ],
+    reward: { money: 210, reputation: 12 },
+    completion: 'Bubbles files the receipt under ACTUAL BUSINESS. It is a very small folder, but it is growing.',
+  },
+  {
+    id: 'gas_money', title: 'A house with a gas pedal', giver: 'ricky', requires: [],
+    description: 'The Shitmobile is Ricky’s car, kitchen, and bedroom. Fetch a spare fuel can from the highway station for his mobile home.',
+    steps: [
+      { type: 'visit', target: 'gasStation', text: 'Follow the road out of Sunnyvale to the gas station.' },
+      { type: 'collect', target: 'fuelCan', count: 1, text: 'Pick up a spare fuel can outside the station.' },
+      { type: 'deliver', target: 'ricky', item: 'fuelCan', count: 1, text: 'Bring the fuel can back to Ricky. Check his current location.' },
+    ],
+    reward: { money: 140, reputation: 9 },
+    completion: 'Ricky declares his house fully refuelled. He still cannot find the kitchen, but he is fairly sure it is the passenger seat.',
+  },
+  {
+    id: 'gravel_inspection', title: 'Professional rock opinions', giver: 'cory', requires: [],
+    description: 'Cory needs samples from the gravel pit for the park’s drainage repairs. For once, he has been told exactly which rocks to bring.',
+    steps: [
+      { type: 'visit', target: 'quarry', text: 'Take the highway turn-off to the gravel pit.' },
+      { type: 'collect', target: 'quarryStone', count: 2, text: 'Collect 2 gravel samples beside the quarry office.' },
+      { type: 'deliver', target: 'cory', item: 'quarryStone', count: 2, text: 'Find Cory and give him both gravel samples.' },
+    ],
+    reward: { money: 180, reputation: 11 },
+    completion: 'Cory studies the samples. “Yep. Rocks.” Jacob writes that down as the official inspection report.',
+  },
+  {
+    id: 'gone_fishing', title: 'Gone fishin’, probably', giver: 'julian', requires: [],
+    description: 'Julian wants one quiet afternoon at the lake. Someone packed everything except the fishing tackle. It is waiting at the dock.',
+    steps: [
+      { type: 'visit', target: 'lake', text: 'Find the fishing dock at the forest lake.' },
+      { type: 'collect', target: 'fishingTackle', count: 1, text: 'Pick up the forgotten tackle box by the dock.' },
+      { type: 'deliver', target: 'julian', item: 'fishingTackle', count: 1, text: 'Return the tackle to Julian, wherever his day has taken him.' },
+    ],
+    reward: { money: 190, reputation: 10 },
+    completion: 'Julian finally has tackle. Ricky has brought a lawn chair and several completely unrelated tools. The trip is nearly organized.',
+  },
+  {
+    id: 'vinyl_revival', title: 'Sunnyvale goes analogue', giver: 'jroc', requires: [],
+    description: 'J-Roc spotted a forgotten crate of records by the city pawnshop. Bring one home before Cory mistakes it for a very flat tire.',
+    steps: [
+      { type: 'visit', target: 'pawnShop', text: 'Drive to the pawnshop on the city’s commercial strip.' },
+      { type: 'collect', target: 'vinylRecord', count: 1, text: 'Collect a record from the crate outside the pawnshop.' },
+      { type: 'deliver', target: 'jroc', item: 'vinylRecord', count: 1, text: 'Track down J-Roc and deliver the record.' },
+    ],
+    reward: { money: 230, reputation: 13 },
+    completion: 'The record spins. J-Roc nods thoughtfully and announces an entirely new artistic direction. It sounds a lot like the last one.',
+  },
+  {
+    id: 'city_delivery', title: 'An actually useful errand', giver: 'sarah', requires: [],
+    description: 'Sarah has a community-supply parcel waiting at the city diner. A straightforward delivery. She emphasizes the word straightforward.',
+    steps: [
+      { type: 'visit', target: 'cityDiner', text: 'Follow the highway to the city diner.' },
+      { type: 'collect', target: 'deliveryParcel', count: 1, text: 'Pick up Sarah’s parcel outside the diner.' },
+      { type: 'deliver', target: 'sarah', item: 'deliveryParcel', count: 1, text: 'Bring the parcel to Sarah. The directory shows where she is.' },
+    ],
+    reward: { money: 220, reputation: 12 },
+    completion: 'Sarah checks the parcel, checks the receipt, and checks that you did not trade either for a shopping cart. A successful delivery.',
+  },
+  {
     id: 'cart_service', title: 'A cart with a heart', giver: 'bubbles', requires: [],
     description: 'Bubbles can turn a few stray carts into a proper repair business. Round up his first batch.',
     steps: [

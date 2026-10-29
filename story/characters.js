@@ -10,9 +10,9 @@ export const characters = [
     ],
   },
   {
-    id: 'ricky', name: 'Ricky', x: 725, y: 775, color: '#dbb591', hair: '#493a30', shirt: '#a76048',
+    id: 'ricky', name: 'Ricky', x: 690, y: 755, color: '#dbb591', hair: '#493a30', shirt: '#a76048',
     dialogue: [
-      'I have a plan, and this time it\'s ninety percent a real plan.',
+      'The Shitmobile is my house. The yard is my living room. If you borrow my house, bring it back in one piece.',
       'The car only needs a few more parts. Probably the parts that make it go.',
       'People say money doesn\'t grow on trees. That\'s why I\'m trying a different business.',
       'That\'s a decent handbag. How many pepperonis does it hold? That\'s how you measure a good bag.',

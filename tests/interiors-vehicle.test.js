@@ -13,8 +13,9 @@ const memory = () => { const data = new Map(); return { getItem: key => data.get
 
 test('every building has a furnished interior with a clear spawn and reachable exit', () => {
     const game = create();
-    assert.equal(Object.keys(interiors).length, locations.length);
-    for (const location of locations) {
+    const buildings = locations.filter(location => location.enterable !== false);
+    assert.equal(Object.keys(interiors).length, buildings.length);
+    for (const location of buildings) {
         const room = interiors[location.id];
         assert.ok(room.furniture.length >= 4, `Empty room: ${location.id}`);
         game.state.scene = location.id;
@@ -36,7 +37,7 @@ test('every building has a furnished interior with a clear spawn and reachable e
 
 test('doors enter rooms, furniture collides and interacts, and exits return to the same door', () => {
     const game = create();
-    const building = locations.find(location => location.id === 'ricky');
+    const building = locations.find(location => location.id === 'julian');
     at(game, { x: 3200, y: 2300 });
     assert.equal(game.enterBuilding(building.id), false);
     at(game, building.door);
@@ -111,7 +112,7 @@ test('the Shitmobile accelerates, steers, coasts, and safely returns the player 
 
 test('car collision cannot tunnel through a trailer', () => {
     const game = create();
-    const building = locations.find(location => location.id === 'ricky');
+    const building = locations.find(location => location.id === 'julian');
     const car = game.state.vehicle;
     Object.assign(car, { x: building.x + building.w / 2, y: building.y + building.h + 36, angle: -Math.PI / 2, speed: 400, driving: true });
     at(game, car);
@@ -125,7 +126,7 @@ test('car collision cannot tunnel through a trailer', () => {
 
 test('the long car footprint stops its front corner before it enters a trailer', () => {
     const game = create();
-    const building = locations.find(location => location.id === 'ricky');
+    const building = locations.find(location => location.id === 'julian');
     const car = game.state.vehicle;
     Object.assign(car, { x: building.x - 45, y: building.y + building.h + 45,
         angle: -Math.PI / 4, speed: 400, driving: true });
@@ -140,7 +141,7 @@ test('the long car footprint stops its front corner before it enters a trailer',
         'Front collision circle stays outside the trailer corner');
 });
 
-test('version 2 preserves rooms and parked cars; version 1 migrates gear and schemes to the new spawn', () => {
+test('current saves preserve rooms and parked cars; version 1 migrates gear and schemes to the new spawn', () => {
     const storage = memory();
     const game = new GameEngine({ storage });
     const building = locations.find(location => location.id === 'bubbles');
@@ -159,7 +160,7 @@ test('version 2 preserves rooms and parked cars; version 1 migrates gear and sch
     storage.setItem(SAVE_KEY, JSON.stringify({ version: 1, player: { x: 100, y: 100 }, money: 650,
         inventory: { burger: 2 }, completedQuests: [quests[0].id], activeQuests: { [quests[1].id]: { step: 0 } } }));
     const migrated = new GameEngine({ storage });
-    assert.equal(migrated.state.version, 2);
+    assert.equal(migrated.state.version, 3);
     assert.equal(migrated.state.scene, 'park');
     assert.equal(migrated.state.player.x, PLAYER_START.x);
     assert.equal(migrated.state.player.y, PLAYER_START.y);
@@ -210,7 +211,7 @@ test('interiors and the car provide real encounter escapes only when reached, wi
         const game = create();
         assert.equal(game.startEncounter(type, { force: true }), true);
         const encounter = game.encounter;
-        const building = locations.find(location => location.id === 'ricky');
+        const building = locations.find(location => location.id === 'julian');
         at(game, { x: 3200, y: 2300 });
         assert.equal(game.enterBuilding(building.id), false);
         assert.equal(game.toggleVehicle(), false);

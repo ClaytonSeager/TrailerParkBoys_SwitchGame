@@ -4,9 +4,12 @@ import { items, pickups } from './story/items.js';
 import { quests } from './story/quests.js';
 import { interiors } from './story/interiors.js';
 import * as encounters from './encounters.js';
+import { initializeNPCs, updateNPCs, reactToHorn } from './npcSimulation.js';
 
 export const SAVE_KEY = 'sunnyvale-open-world-v1';
 const { WORLD, locations } = worldData;
+const SOLID_LOCATIONS = locations.filter(location => location.solid !== false);
+const FOOD_SHOPS = new Set(['burger', 'store', 'gasStation', 'cityDiner', 'mall']);
 const PLAYER_RADIUS = 13;
 const START = worldData.PLAYER_START || { x: 725, y: 790, facing: 'down' };
 const VEHICLE_START = worldData.VEHICLE_START || { x: 760, y: 855, angle: 0 };
@@ -14,7 +17,7 @@ const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const finite = (value, fallback) => Number.isFinite(value) ? value : fallback;
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const byId = (list, id) => list.find(entry => entry.id === id);
-const freshState = () => ({ version: 2, scene: 'park', outdoorPosition: null,
+const freshState = () => ({ version: 3, npcClock: 0, scene: 'park', outdoorPosition: null,
     player: { ...START }, vehicle: { id: 'shitmobile', ...VEHICLE_START, speed: 0, driving: false },
     xp: 0, level: 1, wins: 0, money: 80, reputation: 0,
     health: 100, mentalState: 100, energy: 100, day: 1, minutes: 480, inventory: {},
@@ -34,6 +37,7 @@ export class GameEngine {
         this.load();
         this.random = options.random || Math.random;
         encounters.initializeEncounters(this, this.random);
+        initializeNPCs(this);
     }
 
     emit(type, text) {
@@ -47,13 +51,48 @@ export class GameEngine {
 
     getWorldBounds() { return this.getInterior() || WORLD; }
 
+    getMapRegion() { return worldData.getRegionAt?.(this.state.player.x, this.state.player.y) || { name: 'Sunnyvale' }; }
+
+    getCharacters(scene = this.state.scene) {
+        return (this.residents || characters.map(character => ({ ...character, scene: 'park' })))
+            .filter(resident => resident.scene === scene && !resident.hiddenByEncounter);
+    }
+
+    findResident(id) { return this.residents?.find(resident => resident.id === id) || null; }
+
+    getResidentStatus(id) {
+        const resident = this.findResident(id);
+        if (!resident) return null;
+        const indoors = resident.scene !== 'park';
+        const building = indoors ? byId(locations, resident.scene) : locations.filter(location =>
+            location.door && distance(location.door, resident) < 180).sort((a, b) => distance(a.door, resident) - distance(b.door, resident))[0];
+        return { resident, scene: resident.scene, locationId: building?.id || null, indoors,
+            x: resident.x, y: resident.y, mapX: indoors ? building.door.x : resident.x,
+            mapY: indoors ? building.door.y : resident.y, activity: resident.activity,
+            label: resident.hiddenByEncounter ? 'With the park patrol' : indoors ? `Inside ${building.name}` :
+                building ? `Near ${building.name}` : resident.activity };
+    }
+
+    getCharacterStatus(id) { return this.getResidentStatus(id); }
+
+    pauseResident(id, seconds = 20) {
+        const resident = this.findResident(id);
+        if (!resident) return;
+        if (!resident.conversation) resident.activityBeforeChat = resident.activity;
+        resident.conversation = Math.max(resident.conversation, seconds);
+        resident.moving = false;
+        const dx = this.state.player.x - resident.x, dy = this.state.player.y - resident.y;
+        resident.facing = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+        resident.activity = 'Having a chat';
+    }
+
     isBlocked(x, y, radius = PLAYER_RADIUS, scene = this.state.scene) {
         const room = scene === 'park' ? null : interiors[scene];
         const bounds = room || WORLD;
         const inset = room ? 32 : 0;
         if (!Number.isFinite(x) || !Number.isFinite(y) || x < radius + inset || y < radius + inset ||
             x > bounds.width - radius - inset || y > bounds.height - radius - inset) return true;
-        const obstacles = room ? room.furniture.filter(prop => prop.solid !== false) : locations;
+        const obstacles = room ? room.furniture.filter(prop => prop.solid !== false) : SOLID_LOCATIONS;
         return obstacles.some(rect => x + radius > rect.x && x - radius < rect.x + rect.w &&
             y + radius > rect.y && y - radius < rect.y + rect.h);
     }
@@ -77,7 +116,7 @@ export class GameEngine {
     enterBuilding(id) {
         const building = byId(locations, id);
         const room = interiors[id];
-        if (!building || !room || this.state.scene !== 'park' || this.state.vehicle.driving ||
+        if (!building || building.enterable === false || !room || this.state.scene !== 'park' || this.state.vehicle.driving ||
             distance(this.state.player, building.door) > 90) return false;
         this.visit(id);
         this.escapeEncounter();
@@ -85,7 +124,7 @@ export class GameEngine {
         this.state.scene = id;
         this.state.player = { ...room.spawn, facing: 'up' };
         this.moving = false;
-        this.emit('info', `Entered ${building.name}`);
+        this.emit('door', `Entered ${building.name}`);
         this.save();
         return true;
     }
@@ -99,7 +138,7 @@ export class GameEngine {
         this.state.player = { ...point, facing: 'down' };
         this.state.outdoorPosition = null;
         this.moving = false;
-        this.emit('info', 'Back out in Sunnyvale.');
+        this.emit('door', 'Back outside.');
         this.save();
         return true;
     }
@@ -115,7 +154,7 @@ export class GameEngine {
                     vehicle.driving = false;
                     vehicle.speed = 0;
                     this.state.player = { ...point, facing: 'down' };
-                    this.emit('info', 'Parked the Shitmobile. Somehow, it still runs.');
+                    this.emit('engine-stop', 'Parked the Shitmobile. Somehow, it still runs.');
                     this.save();
                     return true;
                 }
@@ -129,7 +168,7 @@ export class GameEngine {
         vehicle.speed = 0;
         this.state.player.x = vehicle.x;
         this.state.player.y = vehicle.y;
-        this.emit('info', 'The Shitmobile is yours. W/S gas and reverse, A/D steer, E to get out.');
+        this.emit('engine-start', 'The Shitmobile is yours. W/S gas and reverse, A/D steer, E to get out.');
         this.save();
         return true;
     }
@@ -200,8 +239,9 @@ export class GameEngine {
     }
 
     update(dt) {
-        if (!Number.isFinite(dt) || dt <= 0) return;
+        if (this.paused || !Number.isFinite(dt) || dt <= 0) return;
         const seconds = clamp(dt, 0, 0.25);
+        this.hornCooldown = Math.max(0, (this.hornCooldown || 0) - seconds);
         this.state.minutes += seconds;
         // A gentle hunger meter after breakfast; nobody dies while exploring.
         if (this.state.minutes >= 600 && this.state.health > 15) {
@@ -210,6 +250,7 @@ export class GameEngine {
         this.saveTimer += seconds;
         if (this.state.minutes >= 1320) this.rest();
         if (this.state.scene === 'park' && !this.state.vehicle.driving) encounters.updateEncounters(this, seconds);
+        updateNPCs(this, seconds);
         if (this.saveTimer >= 5) { this.save(); this.saveTimer = 0; }
     }
 
@@ -219,14 +260,16 @@ export class GameEngine {
         const room = this.getInterior();
         if (room) {
             const candidates = [{ type: 'exit', entity: { ...room.exit, name: 'Back to Sunnyvale' }, distance: distance(player, room.exit) },
+                ...this.getCharacters().map(entity => ({ type: 'character', entity, distance: distance(player, entity) })),
                 ...room.furniture.map(entity => ({ type: 'furniture', entity, distance: Math.hypot(
                     player.x - clamp(player.x, entity.x, entity.x + entity.w),
                     player.y - clamp(player.y, entity.y, entity.y + entity.h)) }))];
-            return candidates.filter(entry => entry.distance <= 75).sort((a, b) => a.distance - b.distance)[0] || null;
+            return candidates.filter(entry => entry.distance <= (entry.type === 'character' ? 85 : 75))
+                .sort((a, b) => (a.distance - (a.type === 'character' ? 20 : 0)) - (b.distance - (b.type === 'character' ? 20 : 0)))[0] || null;
         }
         const candidates = [
             { type: 'vehicle', entity: { ...this.state.vehicle, name: "Ricky's Shitmobile" }, distance: distance(player, this.state.vehicle) },
-            ...characters.map(entity => ({ type: 'character', entity, distance: distance(player, entity) })),
+            ...this.getCharacters().map(entity => ({ type: 'character', entity, distance: distance(player, entity) })),
             ...locations.map(entity => ({ type: 'location', entity, distance: distance(player, entity.door) })),
             ...pickups.filter(entity => !this.state.collected.includes(entity.id))
                 .map(entity => ({ type: 'pickup', entity, distance: distance(player, entity) }))
@@ -254,10 +297,15 @@ export class GameEngine {
             return { type: 'pickup', title: items[entity.item].name, text: collected ? `Added to your handbag: ${items[entity.item].name}.` : 'You already picked that up.' };
         }
         if (nearest.type === 'location') {
+            if (entity.enterable === false) {
+                this.visit(entity.id);
+                return { type: 'yard', title: entity.name, text: entity.description, location: entity };
+            }
             const success = this.enterBuilding(entity.id);
             return { type: success ? 'transition' : 'notice', title: entity.name, text: success ? 'Step inside. Walk up to the furnishings to take a look around.' : 'Get a little closer to the door first.', location: entity };
         }
 
+        this.pauseResident(entity.id);
         this.refreshQuests();
         const completedBefore = new Set(this.state.completedQuests);
         let questText = '';
@@ -299,8 +347,9 @@ export class GameEngine {
     acceptQuest(id) {
         const quest = this.getAvailableQuests().find(entry => entry.id === id);
         if (!quest) return false;
-        const giver = byId(characters, quest.giver);
-        if (this.state.scene !== 'park' || this.state.vehicle.driving || !giver || distance(this.state.player, giver) > 110) return false;
+        const giver = this.findResident(quest.giver);
+        if (this.state.vehicle.driving || !giver || giver.scene !== this.state.scene || giver.hiddenByEncounter || distance(this.state.player, giver) > 110) return false;
+        this.pauseResident(giver.id);
         this.state.activeQuests[id] = { step: 0, progress: 0 };
         this.emit('quest', `New scheme: ${quest.title}`);
         this.refreshQuests();
@@ -397,9 +446,9 @@ export class GameEngine {
         const item = items[id];
         const cost = item?.cost ?? item?.price;
         if (!Number.isFinite(cost) || cost <= 0) return false;
-        const shop = ['burger', 'store'].includes(this.state.scene) || this.state.scene === 'park' && locations.find(location => ['burger', 'store'].includes(location.id) && distance(this.state.player, location.door) <= 100);
-        const randy = byId(characters, 'randy');
-        const nearRandy = this.state.scene === 'park' && randy && distance(this.state.player, randy) <= 110;
+        const shop = FOOD_SHOPS.has(this.state.scene) || this.state.scene === 'park' && locations.find(location => FOOD_SHOPS.has(location.id) && distance(this.state.player, location.door) <= 100);
+        const randy = this.findResident('randy');
+        const nearRandy = randy && randy.scene === this.state.scene && distance(this.state.player, randy) <= 110;
         if (!shop && !nearRandy) { this.emit('info', 'Walk up to the shop or burger stand to buy supplies.'); return false; }
         if (this.state.money < cost) { this.emit('warning', 'Not enough cash, bud. Finish a scheme first.'); return false; }
         this.state.money -= cost;
@@ -412,9 +461,9 @@ export class GameEngine {
 
     work() {
         const garage = byId(locations, 'garage');
-        const cory = byId(characters, 'cory');
-        const nearby = this.state.scene === 'garage' || this.state.scene === 'park' &&
-            (garage && distance(this.state.player, garage.door) <= 110 || cory && distance(this.state.player, cory) <= 110);
+        const cory = this.findResident('cory');
+        const nearby = this.state.scene === 'garage' || this.state.scene === 'park' && garage && distance(this.state.player, garage.door) <= 110 ||
+            cory && cory.scene === this.state.scene && distance(this.state.player, cory) <= 110;
         if (!nearby) { this.emit('info', 'Cory has odd jobs at the repair shop. Go see him for a little extra cash.'); return false; }
         if (this.state.energy < 15) { this.emit('warning', 'You need 15 energy for an odd job. Grab a snack or rest up first.'); return false; }
         this.state.energy = Math.max(0, this.state.energy - 15);
@@ -444,6 +493,31 @@ export class GameEngine {
         this.encounter = null;
         this.emit('info', 'Rested up. Another beautiful day for questionable business decisions.');
         this.save();
+    }
+
+    restInCar() {
+        const car = this.state.vehicle;
+        if (Math.abs(car.speed) > 3) { this.emit('warning', 'Park the Shitmobile before trying to sleep in it.'); return false; }
+        if (this.state.scene !== 'park' || !car.driving && distance(this.state.player, car) > 110) {
+            this.emit('info', 'Walk up to the Shitmobile to crash for the night.'); return false;
+        }
+        const point = this.findSafePosition({ x: car.x + Math.cos(car.angle + Math.PI / 2) * 75,
+            y: car.y + Math.sin(car.angle + Math.PI / 2) * 75 });
+        this.rest();
+        this.state.player = { ...point, facing: 'down' };
+        this.emit('info', 'Slept in the Shitmobile. A home is a home, bud.');
+        this.save();
+        return true;
+    }
+
+    useHorn() {
+        const car = this.state.vehicle;
+        if (this.state.scene !== 'park' || !car.driving && distance(this.state.player, car) > 110) return false;
+        if (this.hornCooldown > 0) return false;
+        this.hornCooldown = .7;
+        this.emit('horn', 'Honk!');
+        reactToHorn(this);
+        return true;
     }
 
     checkEnding() {
@@ -490,7 +564,7 @@ export class GameEngine {
     chooseEncounter(id) { return encounters.chooseEncounter(this, id); }
     combatAction(action) { return encounters.combatAction(this, action); }
 
-    serialize() { return JSON.stringify({ ...this.state, version: 2 }); }
+    serialize() { return JSON.stringify({ ...this.state, version: 3 }); }
 
     save() {
         if (!this.storage) return false;
@@ -503,7 +577,7 @@ export class GameEngine {
             const raw = this.storage?.getItem(SAVE_KEY);
             if (!raw) return false;
             const parsed = JSON.parse(raw);
-            if (!parsed || ![1, 2].includes(parsed.version) || typeof parsed !== 'object') return false;
+            if (!parsed || ![1, 2, 3].includes(parsed.version) || typeof parsed !== 'object') return false;
             const state = freshState();
             for (const stat of ['health', 'mentalState', 'energy']) state[stat] = clamp(finite(parsed[stat], state[stat]), 0, 100);
             state.money = clamp(finite(parsed.money, 80), 0, 10000000);
@@ -514,7 +588,8 @@ export class GameEngine {
             state.xp = Math.floor(clamp(finite(parsed.xp, 0), 0, 10000000));
             state.level = 1 + Math.floor(state.xp / 100);
             state.wins = Math.floor(clamp(finite(parsed.wins, 0), 0, 1000000));
-            if (parsed.version === 2) {
+            state.npcClock = clamp(finite(parsed.npcClock, 0), 0, 10000000);
+            if (parsed.version >= 2) {
                 state.scene = interiors[parsed.scene] ? parsed.scene : 'park';
                 const bounds = state.scene === 'park' ? WORLD : interiors[state.scene];
                 state.player.x = clamp(finite(parsed.player?.x, START.x), PLAYER_RADIUS, bounds.width - PLAYER_RADIUS);
@@ -529,6 +604,10 @@ export class GameEngine {
                 state.vehicle.y = clamp(finite(parsed.vehicle?.y, VEHICLE_START.y), 30, WORLD.height - 30);
                 state.vehicle.angle = finite(parsed.vehicle?.angle, VEHICLE_START.angle);
                 state.vehicle.driving = state.scene === 'park' && parsed.vehicle?.driving === true;
+                if (parsed.scene === 'ricky') {
+                    state.scene = 'park'; state.outdoorPosition = null; state.vehicle.driving = false;
+                    state.player = { ...byId(locations, 'ricky').door, facing: 'down' };
+                }
             }
             for (const [key, ids] of [['completedQuests', quests], ['collected', pickups], ['visited', locations]]) {
                 state[key] = [...new Set(Array.isArray(parsed[key]) ? parsed[key].filter(id => ids.some(entry => entry.id === id)) : [])];
@@ -562,6 +641,7 @@ export class GameEngine {
         this.saveTimer = 0;
         this.encounter = null;
         encounters.initializeEncounters(this, this.random || Math.random);
+        initializeNPCs(this);
         this.save();
     }
 }

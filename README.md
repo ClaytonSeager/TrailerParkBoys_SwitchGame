@@ -2,7 +2,9 @@
 
 A top-down browser adventure set in Sunnyvale Trailer Park. Walk the park, meet Ricky, Julian, Bubbles and the neighbours, collect supplies, and complete connected missions. Built with HTML, CSS, JavaScript modules and a Canvas renderer; no install or game engine required.
 
-Explore 47 buildings along winding trailer park lanes, with furnished interiors behind every door. Meet the residents, complete 12 connected schemes, drive Ricky's Shitmobile, and survive the occasional neighbourhood argument. The closer camera has adjustable zoom, richer character sprites, and detailed lots and rooms.
+Explore Sunnyvale and the roads beyond it: a forest highway, gas station, gravel pit, fishing lake, salvage yard, and a distant city strip with a mall, diner, pawnshop and liquor store. Ricky has an open yard and lives in the Shitmobile. The other buildings have furnished interiors.
+
+Residents have walking routes and errands, go inside buildings, and react to fights, fast cars, and the horn. A live directory and objective tracking follow their changing locations, including indoor visits. Eighteen missions include six trips outside the park; deliveries and conversations work with moving residents in the same room as the player.
 
 Random encounters include four bottle kids throwing visible bottles, Lahey pulling up with Randy, Cyrus demanding money, runaway shopping carts, and a kitty rescue with Bubbles. Conversations can lead to peaceful resolutions or real-time scraps. Punch, block, dodge, earn XP, and level up. Knockouts preserve gear and mission progress.
 
@@ -20,11 +22,17 @@ Random encounters include four bottle kids throwing visible bottles, Lahey pulli
 | Block | Q |
 | Dodge | Space |
 | Camera zoom | + / −, mouse wheel, or on-screen buttons |
+| Shitmobile horn | H or the driving HUD button |
+| Toggle sound | V |
 | Park map | M |
 | Mission journal | J |
 | Handbag | I or B |
 
 The game also provides clickable combat and touch movement controls. Approach doors or furniture and press E. Beds restore your stats; shop counters sell snacks; the repair shop offers odd jobs. You can flee an encounter into a building or the Shitmobile without earning its reward.
+
+Leave through the south entrance and follow Route 7 to explore beyond Sunnyvale. The full map has regional views and destination pins; the minimap follows your area. Park the car before using **Crash in the car** to rest in Ricky's mobile home.
+
+Original procedural audio includes footsteps, doors, pickups, quest cues, punches, bottles, a speed-sensitive engine, the horn, and regional ambience. Sound starts with a click or key press. Use the sound button for master, ambience, and effects volumes; preferences save locally. Menus and hidden tabs pause world ambience. There are no downloaded music or voice samples.
 
 Progress saves in this browser's local storage. Earlier saves retain cash, inventory, and mission progress and move the player to the expanded park's spawn. The car, interior, and RPG progress also save; active ambushes do not resume on reload. Use How to play → Start a new game to start over.
 
@@ -58,6 +66,8 @@ The separate [checks workflow](.github/workflows/checks.yml) runs the mechanics 
 - `renderer.js`: the park, characters and camera.
 - `gameEngine.js`: movement, interactions, missions, inventory and saves.
 - `encounters.js`: roaming events, choices, projectiles, combat and rewards.
+- `npcSimulation.js`: resident navigation, errands, indoor visits, and reactions.
+- `audio.js`: gesture-safe Web Audio ambience, effects, volume and mute settings.
 - `story/interiors.js`: furnished room layouts and interactions for every building.
 - `story/`: locations, characters, items, pickups and mission content.
 - `tests/`: mechanics and data checks.
