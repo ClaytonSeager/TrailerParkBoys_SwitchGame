@@ -1,29 +1,46 @@
-export const WORLD = { width: 2400, height: 1700 };
-
-export const roads = [
-  { x: 55, y: 710, w: 2290, h: 110 },
-  { x: 55, y: 1260, w: 2290, h: 110 },
-  { x: 55, y: 480, w: 100, h: 890 },
-  { x: 875, y: 480, w: 100, h: 890 },
-  { x: 1940, y: 480, w: 100, h: 890 },
+export const WORLD = { width: 3400, height: 2400 };
+export const PLAYER_START = { x: 725, y: 815, facing: 'down' };
+export const VEHICLE_START = { x: 760, y: 855, angle: 0 };
+export const PATROL_ROUTE = [
+  {x:320,y:500},{x:900,y:470},{x:1600,y:510},{x:2350,y:470},{x:3020,y:560},
+  {x:3120,y:1120},{x:3080,y:1830},{x:2700,y:2010},{x:1900,y:1980},
+  {x:1100,y:2040},{x:400,y:1930},{x:260,y:1450},{x:280,y:880},{x:320,y:500},
 ];
-
+// Roads form an irregular loop with two winding lanes through the neighborhoods.
+export const roads = [];
+export const roadPaths = [
+  { points: PATROL_ROUTE, width: 88 },
+  { points: [{x:280,y:880},{x:800,y:850},{x:1300,y:880},{x:1900,y:850},{x:2500,y:880},{x:3100,y:980}], width: 78 },
+  { points: [{x:260,y:1450},{x:830,y:1430},{x:1300,y:1400},{x:1900,y:1450},{x:2500,y:1410},{x:3100,y:1450}], width: 78 },
+  { points: [{x:1530,y:505},{x:1550,y:880},{x:1500,y:1425},{x:1570,y:2000}], width: 70 },
+];
 export const landmarks = [
-  { id: 'entrance', name: 'Sunnyvale Park Entrance', x: 1200, y: 1510, kind: 'entrance' },
+  { id:'entrance',name:'Sunnyvale Park Entrance',x:1660,y:2360,kind:'entrance' },
+  { id:'pond',name:'The duck pond',x:3275,y:400,kind:'pond' },
 ];
-
-// Building rectangles are solid. Doors sit in open space beneath their fronts.
-export const locations = [
-  { id: 'ricky', name: "Ricky's trailer", shortName: 'RICKY', x: 165, y: 210, w: 300, h: 175, color: '#d9d2ad', roofColor: '#826d59', kind: 'trailer', description: 'A perfectly good trailer. The car on the lawn is also a perfectly good trailer, according to Ricky.', door: { x: 315, y: 410 } },
-  { id: 'julian', name: "Julian's trailer", shortName: 'JULIAN', x: 560, y: 210, w: 300, h: 175, color: '#b6c4b3', roofColor: '#566853', kind: 'trailer', description: 'Headquarters of several extremely temporary business ventures. Coasters are mandatory.', door: { x: 710, y: 410 } },
-  { id: 'bubbles', name: "Bubbles' shed", shortName: 'BUBBLES', x: 1000, y: 230, w: 255, h: 155, color: '#bd9a6a', roofColor: '#705341', kind: 'shed', description: 'Shopping carts, rescued kitties, and the only sensible person within walking distance.', door: { x: 1127, y: 410 } },
-  { id: 'sarah', name: "Sarah's trailer", shortName: 'SARAH', x: 1390, y: 210, w: 290, h: 175, color: '#c9b6a4', roofColor: '#8c6571', kind: 'trailer', description: 'Haircuts, practical advice, and no patience for another one of the boys\' schemes.', door: { x: 1535, y: 410 } },
-  { id: 'jroc', name: "J-Roc's trailer", shortName: 'J-ROC', x: 1820, y: 210, w: 310, h: 175, color: '#a4bbbf', roofColor: '#597c80', kind: 'trailer', description: 'Sunnyvale Sound Studio. Open whenever someone remembers where the extension cord went.', door: { x: 1975, y: 410 } },
-  { id: 'office', name: "Lahey's park office", shortName: 'PARK OFFICE', x: 205, y: 875, w: 320, h: 205, color: '#d6caa5', roofColor: '#606f59', kind: 'office', description: 'A notice reads: NO SCHEMES. A second notice reads: ESPECIALLY THAT ONE.', door: { x: 365, y: 1105 } },
-  { id: 'burger', name: 'The Dirty Burger', shortName: 'DIRTY BURGER', x: 625, y: 920, w: 235, h: 150, color: '#d0b57c', roofColor: '#ab5d44', kind: 'burger', description: 'Hot grill. Questionable accounting. The best cheeseburger in this particular parking lot.', door: { x: 742, y: 1095 } },
-  { id: 'store', name: 'Sunnyvale general store', shortName: 'GENERAL STORE', x: 1080, y: 890, w: 310, h: 190, color: '#d9caa6', roofColor: '#80745b', kind: 'store', description: 'Cold drinks and hot gossip. Pick up snacks outside to keep your energy up.', door: { x: 1235, y: 1105 } },
-  { id: 'garage', name: 'Cory & Jacob repair shop', shortName: 'REPAIR SHOP', x: 1550, y: 890, w: 340, h: 190, color: '#b8bdb0', roofColor: '#687a72', kind: 'garage', description: 'The sign says FULL SERVICE. Neither mechanic is entirely sure what services those are.', door: { x: 1720, y: 1105 } },
-  { id: 'laundry', name: 'Park laundromat', shortName: 'LAUNDROMAT', x: 2110, y: 890, w: 225, h: 185, color: '#d3d9c6', roofColor: '#718b80', kind: 'laundry', description: 'Three washing machines, two working sockets, and a remarkable number of lost cassette tapes.', door: { x: 2222, y: 1100 } },
-  { id: 'scrapyard', name: 'Sunnyvale salvage yard', shortName: 'SALVAGE YARD', x: 195, y: 1450, w: 360, h: 140, color: '#a6a092', roofColor: '#766e60', kind: 'yard', description: 'One person\'s junk is Bubbles\' next business model. Watch your step around the mufflers.', door: { x: 375, y: 1615 } },
-  { id: 'stage', name: 'Community stage', shortName: 'COMMUNITY STAGE', x: 1775, y: 1450, w: 330, h: 130, color: '#b89b69', roofColor: '#6e5940', kind: 'stage', description: 'A plywood stage with big ambitions. The entire park is counting on a very small generator.', door: { x: 1940, y: 1605 } },
+const named = [
+  ['ricky',"Ricky's trailer",'RICKY',620,625,210,96,'#ddd0a3','#7b5142','trailer','A perfectly good trailer. The car outside is also a perfectly good trailer, according to Ricky.'],
+  ['bubbles',"Bubbles' shed",'BUBBLES',890,640,170,90,'#bd9763','#74513a','shed','Shopping carts, rescued kitties, and the only sensible person within walking distance.'],
+  ['julian',"Julian's trailer",'JULIAN',1160,625,210,96,'#aaba9d','#4c6652','trailer','Headquarters of several extremely temporary business ventures. Coasters are mandatory.'],
+  ['sarah',"Sarah's trailer",'SARAH',1970,625,210,96,'#cab5a6','#875d70','trailer','Haircuts, practical advice, and no patience for another one of the boys\' schemes.'],
+  ['jroc',"J-Roc's trailer",'J-ROC',2510,625,210,96,'#9fbfc2','#44777d','trailer','Sunnyvale Sound Studio. Open whenever someone remembers where the extension cord went.'],
+  ['office',"Lahey's park office",'PARK OFFICE',350,1160,220,110,'#d8c69d','#53684a','office','A notice reads: NO SCHEMES. A second notice reads: ESPECIALLY THAT ONE.'],
+  ['burger','The Dirty Burger','DIRTY BURGER',890,1160,200,105,'#d7b46f','#a34e37','burger','Hot grill. Questionable accounting. The best cheeseburger in this particular parking lot.'],
+  ['store','Sunnyvale general store','GENERAL STORE',1970,1160,210,110,'#d8c69b','#7b6348','store','Cold drinks and hot gossip. Stock up on snacks and make yourself at home.'],
+  ['garage','Cory & Jacob repair shop','REPAIR SHOP',2510,1160,220,110,'#b5bdab','#526e64','garage','FULL SERVICE, says the sign. Neither mechanic is entirely sure what services those are.'],
+  ['laundry','Park laundromat','LAUNDROMAT',2780,1160,210,110,'#ccd4bd','#5c8273','laundry','Three washing machines, two working sockets, and a remarkable number of lost cassette tapes.'],
+  ['scrapyard','Sunnyvale salvage yard','SALVAGE YARD',350,1620,220,105,'#aba18b','#706653','yard','One person\'s junk is Bubbles\' next business model. Watch your step around the mufflers.'],
+  ['stage','Community stage','COMMUNITY STAGE',2510,1620,220,105,'#b99760','#695039','stage','A plywood stage with big ambitions. The entire park is counting on a very small generator.'],
 ];
+export const locations = named.map(([id,name,shortName,x,y,w,h,color,roofColor,kind,description])=>({id,name,shortName,x,y,w,h,color,roofColor,kind,description,door:{x:x+w/2,y:y+h+25}}));
+const palette = [ ['#c2d0b5','#65806b'],['#dbccb1','#8d6e54'],['#bcc8cd','#637e85'],['#d3bcab','#986d63'],['#d4d2ad','#7f8055'],['#abbfa9','#587b62'],['#d7c1ab','#855a4b'] ];
+const names=['Maple','Willow','Birch','Spruce','Cedar','Aspen','Pine','Juniper','Oak','Elm'];
+let lot=1;
+for(const [row,y] of [250,625,1160,1620,2140].entries()) for(let col=0;col<10;col++) {
+  const x=350+col*270;
+  if(col===4&&row>0&&row<4)continue;
+  if(locations.some(b=>b.x===x&&Math.abs(b.y-y)<25))continue;
+  const p=palette[(col+row*3)%palette.length],w=190+((col+row)%3)*10,h=88+((row+col)%2)*8;
+  locations.push({id:`lot${String(lot).padStart(2,'0')}`,name:`${names[col]} Lane / Lot ${String(lot).padStart(2,'0')}`,shortName:`LOT ${String(lot).padStart(2,'0')}`,x,y:y+((col%3)-1)*8,w,h,color:p[0],roofColor:p[1],kind:'trailer',generic:true,lotNumber:lot,description:'A lived-in Sunnyvale home. Come in, look around, and mind the screen door.',door:{x:x+w/2,y:y+((col%3)-1)*8+h+25}});
+  lot++;
+}

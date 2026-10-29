@@ -8,9 +8,13 @@ import { quests } from './story/quests.js';
 const $ = selector => document.querySelector(selector);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const money = value => `$${Math.floor(value).toLocaleString('en-US')}`;
-const engine = new GameEngine();
+export const engine = new GameEngine();
 const canvas = $('#world');
 const renderer = new WorldRenderer(canvas, engine);
+try {
+ const savedZoom = Number(localStorage.getItem('sunnyvale-camera-zoom'));
+ if (savedZoom >= .8 && savedZoom <= 2.6) renderer.setZoom(savedZoom);
+} catch { /* camera controls still work without browser storage */ }
 const keys = new Set();
 const touchKeys = new Set();
 let modalType = null;
@@ -21,6 +25,8 @@ let trackedQuest = null;
 let lastTime = 0;
 let hudTimer = 0;
 let toastTimer;
+let damageTimer;
+let encounterChoiceSignature = '';
 let endingShown = !!engine.state.ending;
 let saveWorks = engine.save();
 const icons = {
@@ -60,7 +66,7 @@ function closeModal() {
 function toggle(type, fn) { modalType === type ? closeModal() : fn(); }
 
 function showWelcome() {
- openModal('welcome', `<span class="welcome-stamp">WELCOME TO THE NEIGHBOURHOOD</span><h1 id="modal-title">Small park.<br>Big friggin’ plans.</h1><p>Sunnyvale needs $1,500 for repairs. The boys have a few ideas. Most of them even sound legal.</p><div class="help-grid"><div><kbd>WASD</kbd> Wander the park</div><div><kbd>E</kbd> Meet the neighbours</div><div><kbd>I</kbd> Check your handbag</div><div><kbd>M</kbd> Find your way</div></div><p>Find <b>Bubbles, Ricky, or Julian</b> on the north side of the main road. Take a job, pick up useful junk, and see what happens.</p><button class="primary-button" data-action="start">Let’s go, bud. <span>↗</span></button><p class="keyboard-note">Click any menu with your mouse. Your progress saves in this browser.</p>`);
+ openModal('welcome', `<span class="welcome-stamp">PARK LIFE JUST GOT COMPLICATED</span><h1 id="modal-title">Home sweet<br>trailer park.</h1><p>Go inside. Take the Shitmobile for a spin. Help the boys save the park. Try not to get bottled on the way.</p><div class="help-grid"><div><kbd>WASD</kbd> Walk / drive</div><div><kbd>E</kbd> Enter / interact</div><div><kbd>F / Q</kbd> Punch / block</div><div><kbd>SPACE</kbd> Dodge trouble</div><div><kbd>I</kbd> Your stupid handbag</div><div><kbd>+ / −</kbd> Camera zoom</div></div><p><b>Ricky’s Shitmobile</b> is parked nearby. Walk up and press E. There are furnished interiors behind every door, schemes around the neighbourhood, and a few familiar faces you might want to avoid.</p><button class="primary-button" data-action="start">Let’s go, bud. <span>↗</span></button><p class="keyboard-note">Money, items, missions, and RPG progress save in this browser.</p>`);
 }
 
 function showBag() {
@@ -70,7 +76,7 @@ function showBag() {
  openModal('bag', `<span class="bag-label">DEFINITELY NOT STOLEN™</span><h1 id="modal-title">The emotional baggage.</h1><p class="subtitle">It’s a handbag. It holds three shopping carts. Don’t question it.</p>
  <div class="bag-stats"><div class="bag-stat"><small>LOOSE CHANGE</small><b>${money(state.money)}</b><div class="bar"><i style="width:${Math.min(100,state.money/15)}%"></i></div></div><div class="bag-stat"><small>♥ HEALTH</small><b>${Math.round(state.health)}<small class="out-of">OUT OF 100</small></b><div class="bar"><i style="width:${state.health}%;background:#b87c63"></i></div></div><div class="bag-stat"><small>✦ MENTAL STATE</small><b>${Math.round(state.mentalState)}<small class="out-of">MOSTLY HOLDING IT TOGETHER</small></b><div class="bar"><i style="width:${state.mentalState}%"></i></div></div></div>
  <div class="bag-tabs"><b>WHAT’S IN THE BAG</b><span>${count} ITEM${count === 1 ? '' : 'S'} · ${Math.round(state.energy)}% HUSTLE LEFT</span></div><div class="bag-items">${inventory.map(([id,n]) => `<article class="bag-item"><span class="item-icon" style="color:${items[id].color}">${escape(items[id].icon)}</span><div><strong>${escape(items[id].name)}</strong><p>${escape(items[id].description)}</p><span class="item-count">× ${n} rattling around</span>${items[id].effect ? `<button data-action="eat" data-id="${id}">Eat it, bud.</button>` : ''}</div></article>`).join('')}</div>
- ${inventory.length ? '' : '<div class="empty-state" style="margin-top:16px">Just lint and questionable potential.<br>Walk over loose items around the park to fill it up.</div>'}<p class="bag-footer">“It’s not a purse. It’s a mobile business headquarters.”</p>`, 'bag-modal');
+ ${inventory.length ? '' : '<div class="empty-state" style="margin-top:16px">Just lint and questionable potential.<br>Walk over loose items around the park to fill it up.</div>'}<div class="bag-career"><span>LEVEL ${state.level || 1} · ${state.xp || 0} XP</span><span>${state.wins || 0} SCRAPS SURVIVED</span></div><p class="bag-footer">“It’s not a purse. It’s a mobile business headquarters.”</p>`, 'bag-modal');
 }
 
 function questEntry(quest, complete = false) {
@@ -94,7 +100,7 @@ function showMap() {
 }
 
 function showHelp() {
- openModal('help', `<div class="eyebrow">THE UNOFFICIAL ORIENTATION</div><h1 id="modal-title">Welcome to park life.</h1><p>Explore Sunnyvale, meet the residents, and help put together a fundraiser. Earn $1,500 and finish 6 schemes to keep the park going.</p><div class="help-grid"><div><kbd>WASD</kbd> Walk around</div><div><kbd>↑←↓→</kbd> Also walk around</div><div><kbd>SHIFT</kbd> Hustle a little</div><div><kbd>E</kbd> Talk & interact</div><div><kbd>I / B</kbd> The handbag</div><div><kbd>J</kbd> Your schemes</div><div><kbd>M</kbd> Park map</div><div><kbd>ESC</kbd> Close a menu</div></div><p>Walk over loose items to collect them. Talk to residents with a <b>yellow !</b> to take a job. A <b>blue diamond</b> marks a mission objective. Open the bag to eat a snack and restore your stats.</p><p>Doors have local information and useful actions. Rest at a trailer to start a fresh day. The repair shop offers odd jobs if you need more cash.</p><div class="button-row"><button class="primary-button" data-action="close">Got it, bud. ↗</button><button class="secondary-button" data-action="save">Save progress</button></div><p class="help-footnote">Progress stays in this browser. Clearing site data clears your save. This is an unofficial fan adventure with original pixel art and dialogue.</p><button class="danger-button" data-action="reset-confirm">Start a new game…</button>`);
+ openModal('help', `<div class="eyebrow">THE UNOFFICIAL ORIENTATION</div><h1 id="modal-title">Welcome to park life.</h1><p>Explore the neighbourhood, go inside the trailers, and help the boys raise $1,500 through at least 6 schemes. Random trouble is part of living here.</p><div class="help-grid"><div><kbd>WASD</kbd> Walk / drive</div><div><kbd>SHIFT</kbd> Sprint on foot</div><div><kbd>E</kbd> Enter / exit / interact</div><div><kbd>F</kbd> Throw a punch</div><div><kbd>Q</kbd> Block an incoming hit</div><div><kbd>SPACE</kbd> Dodge / dash</div><div><kbd>I / B</kbd> The handbag</div><div><kbd>J / M</kbd> Schemes / map</div><div><kbd>+ / −</kbd> Zoom in / out</div><div><kbd>ESC</kbd> Close a menu</div></div><p><b>The Shitmobile:</b> press E beside the car. W accelerates, S brakes and reverses, and A/D steer. Press E to park and get out. On-screen buttons work with a mouse or touch.</p><p><b>Interiors:</b> stand by any door and press E. Inspect furniture, get some rest, or use the shop counter. The exit is at the bottom of the room.</p><p><b>Encounters:</b> watch for four bottle kids, Lahey’s patrol, and Cyrus asking for cash. Your choices can calm things down or start a scrap. Move close to land punches, watch the enemy’s wind-up, and dodge or block. Left-click the world during a fight to punch. Fights earn XP. Getting knocked out sends you home.</p><p>Collect loose supplies, eat snacks from your bag, and rest to recover health, mental state, and energy. Yellow ! means a job; a blue diamond marks an objective.</p><div class="button-row"><button class="primary-button" data-action="close">Got it, bud. ↗</button><button class="secondary-button" data-action="save">Save progress</button></div><p class="help-footnote">Your save stays in this browser. Old mission progress carries into the expanded park. This is an unofficial fan adventure with original art and dialogue.</p><button class="danger-button" data-action="reset-confirm">Start a new game…</button>`);
 }
 
 function shopHTML() {
@@ -118,11 +124,62 @@ function showLocation(result) {
 
 function interact() {
  if (modalType) return;
+ if (engine.encounter?.phase === 'choice' && !['location','vehicle','exit'].includes(engine.nearestInteractable()?.type)) return;
  const result = engine.interact();
  if (result.type === 'dialogue') showDialogue(result);
  else if (result.type === 'location') showLocation(result);
+ else if (result.type === 'interior') showInteriorObject(result);
  else toast(result.text);
  updateHUD();
+}
+
+function showInteriorObject(result) {
+ const prop = result.furniture;
+ openModal('interior', `<div class="eyebrow">${escape(engine.getInterior()?.name || 'INSIDE SUNNYVALE')}</div><h1 id="modal-title">${escape(result.title)}</h1><p>${escape(result.text)}</p>${prop?.action === 'shop' ? shopHTML() : ''}${prop?.action === 'rest' ? '<div class="rest-note">A questionable mattress. A perfectly good night’s sleep. Restores health, mental state, and energy.</div><div class="button-row"><button class="primary-button" data-action="rest">Catch some shut-eye ☾</button></div>' : ''}${prop?.action === 'work' ? '<div class="quest-offer"><h3>There’s always more junk.</h3><p>Sort spare parts for $35. Takes 45 minutes and 15 energy.</p><button class="primary-button" data-action="work">Get to work · +$35</button></div>' : ''}<div class="button-row"><button class="secondary-button" data-action="close">Keep looking around ↗</button></div>`);
+}
+
+function updateEncounterHUD() {
+ const encounter = engine.encounter;
+ const outdoors = !engine.state.scene || engine.state.scene === 'park';
+ const visible = !!encounter && outdoors && !modalType;
+ $('.world-frame').classList.toggle('has-encounter', visible);
+ $('#encounter-banner').hidden = !visible;
+ if (visible) {
+  $('#encounter-name').textContent = encounter.title || ({bottlekids:'BOTTLE KIDS!',lahey:'THE SUPERVISOR IS OUT',cyrus:'CYRUS HAS SOMETHING TO SAY',carts:'RUNAWAY CARTS',kitty:'KITTY SITUATION'}[encounter.type] || 'TROUBLE IN THE PARK');
+  $('#encounter-hint').textContent = encounter.phase === 'choice' ? 'Your move, bud.' : ['combat','attack'].includes(encounter.phase) ? 'Stay light on your feet. F punch · Q block · Space dodge' : encounter.phase === 'depart' ? 'Another normal afternoon in Sunnyvale.' : 'Keep an eye on the lane.';
+ }
+ const choicesVisible = visible && encounter.phase === 'choice';
+ $('#encounter-choice').hidden = !choicesVisible;
+ if (choicesVisible) {
+  const signature = `${encounter.type}|${encounter.phase}|${encounter.text}|${engine.state.money}`;
+  if (signature !== encounterChoiceSignature) {
+   encounterChoiceSignature = signature;
+   $('#encounter-choice').innerHTML = `<div class="eyebrow">WRONG PLACE. FAMILIAR FACES.</div><h2>${escape(encounter.title)}</h2><p>${escape(encounter.text)}</p><div class="encounter-options">${(encounter.choices || []).map((choice,index)=>`<button data-choice="${escape(choice.id)}" ${choice.disabled ? 'disabled' : ''}><span class="choice-number">${index+1}</span><span><b>${escape(choice.text)}</b>${choice.description ? `<small>${escape(choice.description)}</small>` : ''}</span><span>↗</span></button>`).join('')}</div>`;
+  }
+ } else encounterChoiceSignature = '';
+ const fighting = visible && ['combat','attack'].includes(encounter.phase);
+ $('#combat-hud').hidden = !fighting;
+ if (fighting) {
+  const enemies = (encounter.actors || []).filter(a=>a.enemy && a.health > 0 && a.maxHealth);
+  const health = enemies.reduce((n,a)=>n+a.health,0), max = enemies.reduce((n,a)=>n+a.maxHealth,0);
+  $('#combat-enemy').textContent = encounter.type === 'bottlekids' ? 'BOTTLE KIDS · KEEP MOVING' : enemies.map(a=>a.name).join(' & ') || 'WATCH YOUR STEP';
+  $('#combat-enemy-health').textContent = max ? `${Math.ceil(health)} / ${max}` : 'DODGE THE CHAOS';
+  $('#combat-enemy-meter').style.width = `${max ? health/max*100 : 100}%`;
+  $('[data-combat="punch"]').disabled = !max || engine.state.energy < 4;
+ }
+}
+
+function combat(action) {
+ if (modalType || engine.state.vehicle?.driving) return;
+ engine.combatAction(action);
+ updateHUD();
+}
+
+function changeZoom(delta) {
+ renderer.adjustZoom(delta);
+ try { localStorage.setItem('sunnyvale-camera-zoom', String(renderer.zoomLevel)); } catch { /* session preference */ }
+ $('#zoom-value').textContent = `${Math.round((renderer.zoomLevel || renderer.zoom || 1.65)*100)}%`;
+ if (!modalType) canvas.focus({preventScroll:true});
 }
 
 function updateHUD() {
@@ -135,10 +192,24 @@ function updateHUD() {
  const hour = Math.floor(s.minutes / 60), minute = Math.floor(s.minutes % 60);
  $('#clock').textContent = `DAY ${s.day} · ${hour % 12 || 12}:${String(minute).padStart(2,'0')} ${hour >= 12 ? 'PM' : 'AM'}`;
  const nearest = engine.nearestInteractable();
- $('#interaction-prompt').hidden = !nearest || !!modalType;
- if (nearest) $('#interaction-prompt span').textContent = nearest.type === 'character' ? `Talk to ${nearest.entity.name}` : nearest.type === 'pickup' ? `Pick up ${items[nearest.entity.item].name}` : `Check out ${nearest.entity.name}`;
+ const escapePrompt = nearest && ['location','vehicle','exit'].includes(nearest.type);
+ $('#interaction-prompt').hidden = !nearest || !!modalType || (['choice','combat','attack'].includes(engine.encounter?.phase) && !escapePrompt);
+ if (nearest) $('#interaction-prompt span').textContent = engine.state.vehicle?.driving ? 'Park & get out' : nearest.type === 'character' ? `Talk to ${nearest.entity.name}` : nearest.type === 'pickup' ? `Pick up ${items[nearest.entity.item].name}` : nearest.type === 'vehicle' ? 'Get in Ricky’s Shitmobile' : nearest.type === 'exit' ? 'Back to Sunnyvale' : nearest.type === 'furniture' ? `Inspect ${nearest.entity.label || nearest.entity.name}` : `Enter ${nearest.entity.name}`;
  const closestArea = locations.reduce((a,b) => Math.hypot(s.player.x-a.door.x,s.player.y-a.door.y) < Math.hypot(s.player.x-b.door.x,s.player.y-b.door.y) ? a : b);
- $('#area-name').textContent = Math.hypot(s.player.x-closestArea.door.x,s.player.y-closestArea.door.y) < 230 ? closestArea.name.toUpperCase() : s.player.y > 1300 ? 'SUNNYVALE · SOUTH END' : 'SUNNYVALE · MAIN LANE';
+ const room = engine.getInterior();
+ $('#area-name').textContent = room ? `INSIDE · ${room.name.toUpperCase()}` : Math.hypot(s.player.x-closestArea.door.x,s.player.y-closestArea.door.y) < 210 ? closestArea.name.toUpperCase() : s.player.y > WORLD.height*.7 ? 'SUNNYVALE · SOUTH LOOP' : 'SUNNYVALE · THE LANES';
+ $('.area-weather').textContent = room ? 'INDOORS' : '☀ 22°';
+ $('.world-frame').classList.toggle('is-indoors', !!room);
+ $('.world-frame').classList.toggle('is-driving', !!s.vehicle?.driving);
+ $('.world-frame').classList.toggle('is-fighting', ['combat','attack'].includes(engine.encounter?.phase));
+ $('#level-value').textContent = s.level || 1;
+ $('#player-rank').textContent = (s.level || 1) >= 5 ? 'PARK LEGEND' : (s.level || 1) >= 3 ? 'LOCAL TROUBLEMAKER' : 'PARK NEWCOMER';
+ $('#xp-value').textContent = `${(s.xp || 0)%100} / 100 XP`;
+ $('#xp-meter').style.width = `${(s.xp || 0)%100}%`;
+ $('#energy-value').textContent = `⚡ ${Math.round(s.energy)}`;
+ $('#driving-hud').hidden = !s.vehicle?.driving || !!modalType;
+ $('#speed-value').textContent = `${Math.round(Math.abs(s.vehicle?.speed || 0)/7)} KM/H`;
+ $('#zoom-value').textContent = `${Math.round((renderer.zoomLevel || renderer.zoom || 1.65)*100)}%`;
  if (!s.activeQuests[trackedQuest]) trackedQuest = Object.keys(s.activeQuests)[0] || null;
  const progress = trackedQuest ? engine.getQuestProgress(trackedQuest) : null;
  $('.mission-card h2').textContent = s.ending ? 'The park’s still standing.' : progress?.quest.title || 'Keep the park alive.';
@@ -148,6 +219,7 @@ function updateHUD() {
  $('#quest-dot').classList.toggle('on', Object.keys(s.activeQuests).length > 0);
  $('#save-state').textContent = saveWorks ? 'YOUR PROGRESS SAVES AUTOMATICALLY' : 'BROWSER STORAGE UNAVAILABLE · THIS SESSION ONLY';
  renderer.drawMinimap($('#minimap'));
+ updateEncounterHUD();
 }
 
 $('#modal-close').addEventListener('click', closeModal);
@@ -161,6 +233,20 @@ $('#help-button').addEventListener('click', () => toggle('help', showHelp));
 $('#mission-open').addEventListener('click', showJournal);
 $('#interact-click').addEventListener('click', interact);
 $('#touch-interact').addEventListener('click', interact);
+$('#zoom-in').addEventListener('click',()=>changeZoom(.15));
+$('#zoom-out').addEventListener('click',()=>changeZoom(-.15));
+$('#encounter-choice').addEventListener('click',event=>{
+ const button = event.target.closest('[data-choice]');
+ if (button) { engine.chooseEncounter(button.dataset.choice); updateHUD(); canvas.focus({preventScroll:true}); }
+});
+document.querySelectorAll('[data-combat]').forEach(button=>button.addEventListener('click',()=>{combat(button.dataset.combat);canvas.focus({preventScroll:true});}));
+canvas.addEventListener('click',()=>{
+ if (['combat','attack'].includes(engine.encounter?.phase)) combat('punch');
+ else canvas.focus({preventScroll:true});
+});
+canvas.addEventListener('wheel',event=>{
+ if (!modalType) { event.preventDefault(); changeZoom(event.deltaY<0?.1:-.1); }
+},{passive:false});
 
 $('#modal-content').addEventListener('click', event => {
  const button = event.target.closest('[data-action]');
@@ -168,8 +254,8 @@ $('#modal-content').addEventListener('click', event => {
  const {action,id} = button.dataset;
  if (action === 'close') closeModal();
  if (action === 'start') {
-  try { localStorage.setItem('sunnyvale-welcome-seen', 'yes'); } catch { /* session still playable */ }
-  closeModal(); toast('Go north to meet the boys. Yellow ! means someone’s got a scheme.');
+  try { localStorage.setItem('sunnyvale-welcome-seen', 'yes'); localStorage.setItem('sunnyvale-rpg-intro-seen','yes'); } catch { /* session still playable */ }
+  closeModal(); toast('Ricky’s car is nearby. E to enter doors or the Shitmobile. F punch · Space dodge.');
  }
  if (action === 'eat') { engine.useItem(id); showBag(); updateHUD(); }
  if (action === 'accept' && engine.acceptQuest(id)) {
@@ -185,7 +271,7 @@ $('#modal-content').addEventListener('click', event => {
  if (action === 'buy') {
   if (engine.buyItem(id)) {
    toast(`Check the bag for your snacks, bud. ${money(engine.state.money)} left.`);
-   if (dialogue) showDialogue(dialogue); else if (locationDialogue) showLocation(locationDialogue);
+   if (dialogue) showDialogue(dialogue); else if (locationDialogue) showLocation(locationDialogue); else showInteriorObject({title:'Counter service',text:'The finest snacks in this particular building.',furniture:{action:'shop'}});
   }
   updateHUD();
  }
@@ -196,8 +282,9 @@ $('#modal-content').addEventListener('click', event => {
 
 document.addEventListener('keydown', event => {
  const key = event.key.toLowerCase();
+ if (key === ' ' && event.target.closest?.('button,a')) return;
  const movementKey = ['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(key);
- if ((!modalType && movementKey) || ['escape','e','i','b','m','j'].includes(key)) event.preventDefault();
+ if ((!modalType && (movementKey || [' ','f','q','+','=','-'].includes(key))) || ['escape','e','i','b','m','j'].includes(key)) event.preventDefault();
  if (key === 'tab' && modalType) {
   const focusable = [...$('#modal').querySelectorAll('button:not(:disabled),a[href],[tabindex="0"]')];
   const first = focusable[0], last = focusable.at(-1);
@@ -205,12 +292,22 @@ document.addEventListener('keydown', event => {
   else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
   return;
  }
- if (event.repeat && ['e','i','b','m','j','escape'].includes(key)) return;
+ if (event.repeat && ['e','i','b','m','j','escape','f','q',' '].includes(key)) return;
  if (key === 'escape') { closeModal(); return; }
  if (key === 'i' || key === 'b') { toggle('bag', showBag); return; }
  if (key === 'j') { toggle('journal', showJournal); return; }
  if (key === 'm') { toggle('map', showMap); return; }
  if (modalType) return;
+ if (['1','2','3'].includes(key) && engine.encounter?.phase === 'choice') {
+  const choice = engine.encounter.choices?.[Number(key)-1];
+  if (choice) { engine.chooseEncounter(choice.id); updateHUD(); }
+  return;
+ }
+ if (['+','='].includes(key)) { changeZoom(.15); return; }
+ if (key === '-') { changeZoom(-.15); return; }
+ if (key === 'f') { combat('punch'); return; }
+ if (key === 'q') { combat('block'); return; }
+ if (key === ' ') { combat('dodge'); return; }
  if (key === 'e') { interact(); return; }
  keys.add(key);
 });
@@ -237,6 +334,10 @@ function frame(time) {
  if (hudTimer > .15) { updateHUD(); hudTimer = 0; }
  const events = engine.events.splice(0);
  if (events.length) {
+  if (events.some(e=>e.type === 'damage')) {
+   clearTimeout(damageTimer); $('#damage-flash').classList.add('hit');
+   damageTimer = setTimeout(()=>$('#damage-flash').classList.remove('hit'),350);
+  }
   const important = [...events].reverse().find(e=>['reward','ending','quest','warning'].includes(e.type)) || events.at(-1);
   toast(important.text); updateHUD();
  }
@@ -251,6 +352,6 @@ renderer.resize();
 updateHUD();
 $('#loading').hidden = true;
 let welcomed = false;
-try { welcomed = localStorage.getItem('sunnyvale-welcome-seen') === 'yes'; } catch { /* no persistent storage */ }
-if (!welcomed && !engine.state.collected.length && !engine.state.interactions) showWelcome();
+try { welcomed = localStorage.getItem('sunnyvale-rpg-intro-seen') === 'yes'; } catch { /* no persistent storage */ }
+if (!welcomed) showWelcome();
 requestAnimationFrame(frame);

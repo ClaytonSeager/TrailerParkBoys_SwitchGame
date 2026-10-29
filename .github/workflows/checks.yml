@@ -22,8 +22,9 @@ jobs:
         run: npm test
       - name: Check published runtime files
         run: |
-          for file in index.html style.css app.js gameEngine.js renderer.js story/locations.js story/characters.js story/items.js story/quests.js assets/favicon.svg .nojekyll; do
+          for file in index.html style.css app.js gameEngine.js renderer.js encounters.js story/interiors.js story/locations.js story/characters.js story/items.js story/quests.js assets/favicon.svg .nojekyll; do
             test -f "$file" || exit 1
           done
           node --check app.js
           node --check renderer.js
+          node --check encounters.js

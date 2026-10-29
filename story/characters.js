@@ -1,6 +1,6 @@
 export const characters = [
   {
-    id: 'bubbles', name: 'Bubbles', x: 1110, y: 455, color: '#d9b38a', hair: '#b68d54', shirt: '#7994a5',
+    id: 'bubbles', name: 'Bubbles', x: 975, y: 780, color: '#d9b38a', hair: '#b68d54', shirt: '#7994a5',
     dialogue: [
       'These carts aren\'t abandoned. They\'re between careers. There\'s a difference.',
       'The kitties need a new shelter before the rain comes. We can make something decent out of all this junk.',
@@ -10,7 +10,7 @@ export const characters = [
     ],
   },
   {
-    id: 'ricky', name: 'Ricky', x: 315, y: 455, color: '#dbb591', hair: '#493a30', shirt: '#a76048',
+    id: 'ricky', name: 'Ricky', x: 725, y: 775, color: '#dbb591', hair: '#493a30', shirt: '#a76048',
     dialogue: [
       'I have a plan, and this time it\'s ninety percent a real plan.',
       'The car only needs a few more parts. Probably the parts that make it go.',
@@ -20,7 +20,7 @@ export const characters = [
     ],
   },
   {
-    id: 'julian', name: 'Julian', x: 710, y: 455, color: '#c79978', hair: '#302b28', shirt: '#303b36',
+    id: 'julian', name: 'Julian', x: 1265, y: 775, color: '#c79978', hair: '#302b28', shirt: '#303b36',
     dialogue: [
       'One community fundraiser. Straightforward, honest, and ideally profitable.',
       'I need someone who can finish a job without accidentally starting three more. You available?',
@@ -30,7 +30,7 @@ export const characters = [
     ],
   },
   {
-    id: 'randy', name: 'Randy', x: 742, y: 1140, color: '#dcac8a', hair: '#66513d', shirt: '#d9a784',
+    id: 'randy', name: 'Randy', x: 990, y: 1320, color: '#dcac8a', hair: '#66513d', shirt: '#d9a784',
     dialogue: [
       'I\'m running the grill, collecting the tickets, AND doing quality control. Quality control means eating one.',
       'A fundraiser needs cheeseburgers. That\'s not an opinion. That\'s catering.',
@@ -39,7 +39,7 @@ export const characters = [
     ],
   },
   {
-    id: 'lahey', name: 'Mr. Lahey', x: 365, y: 1150, color: '#d2ac8a', hair: '#aaa49a', shirt: '#aab89b',
+    id: 'lahey', name: 'Mr. Lahey', x: 460, y: 1325, color: '#d2ac8a', hair: '#aaa49a', shirt: '#aab89b',
     dialogue: [
       'A suspiciously productive afternoon. I\'m keeping an eye on it.',
       'I\'ve counted every bottle around this park. Twice. The totals are inconsistent, but the principle stands.',
@@ -48,7 +48,7 @@ export const characters = [
     ],
   },
   {
-    id: 'jroc', name: 'J-Roc', x: 1975, y: 455, color: '#d8b08c', hair: '#b9aa83', shirt: '#788e9c',
+    id: 'jroc', name: 'J-Roc', x: 2615, y: 775, color: '#d8b08c', hair: '#b9aa83', shirt: '#788e9c',
     dialogue: [
       'Sunnyvale block party, local talent, global potential. First we need the sound to work.',
       'These tapes are the archives. You don\'t leave history in a laundromat.',
@@ -57,7 +57,7 @@ export const characters = [
     ],
   },
   {
-    id: 'sarah', name: 'Sarah', x: 1535, y: 455, color: '#dfb394', hair: '#9d4e36', shirt: '#7a617a',
+    id: 'sarah', name: 'Sarah', x: 2075, y: 775, color: '#dfb394', hair: '#9d4e36', shirt: '#7a617a',
     dialogue: [
       'Everyone\'s got a big idea. I\'d settle for a working generator and a schedule.',
       'The boys call it a business opportunity. I call it moving their junk out of the walkway.',
@@ -66,7 +66,7 @@ export const characters = [
     ],
   },
   {
-    id: 'cory', name: 'Cory', x: 1720, y: 1145, color: '#d1ab86', hair: '#5c4a37', shirt: '#617e95',
+    id: 'cory', name: 'Cory', x: 2620, y: 1325, color: '#d1ab86', hair: '#5c4a37', shirt: '#617e95',
     dialogue: [
       'Julian said get the generator ready. I got as far as finding the generator.',
       'Jacob sorted the parts by how much they look like other parts. It\'s a system.',
